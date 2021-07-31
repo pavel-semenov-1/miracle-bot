@@ -4,7 +4,7 @@ import os
 def init():
     global httpgetter
     global datapath
-    datapath = '/home/paradox/Desktop/MiracleBot/data'
+    datapath = '/home/ec2-user/miracle-bot/data'
     httpgetter = HttpGetter()
 
 def resource(name):
