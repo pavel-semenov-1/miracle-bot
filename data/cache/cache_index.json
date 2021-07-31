@@ -1,4 +1,6 @@
 {
-	"count": 0,
-	"files": {}
+	"count": 1,
+	"files": {
+		"https://api.stratz.com/api/v1/match/6112198436": "0000.json"
+	}
 }
