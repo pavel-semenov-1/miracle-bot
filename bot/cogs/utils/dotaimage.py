@@ -97,7 +97,7 @@ class DotaImage:
 
 
 async def create_match_result_image(data):
-    img = DotaImage(conf.resource("fonts/"), 'http://www.quaranta.ru/dota_icons/')
+    img = DotaImage(conf.resource("fonts/"), 'http://miraclebot-env.eba-pe2xd7dn.eu-central-1.elasticbeanstalk.com/data/img/')
     await img.put_radiant_dire(data['didRadiantWin'], 385, 170, 1535, 170, 45, 110, 1735, 110)
     img.put_lobby(data['lobbyType'], 960, 100)
     img.put_mode(data['gameMode'], 960, 170)
