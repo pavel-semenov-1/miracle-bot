@@ -65,8 +65,7 @@ class Dota(commands.Cog):
     async def add_comand(self, ctx, steamId, *, username: t.Optional[str]):
         if not username:
             username = ctx.message.author.name
-        conf.connection.getCursor().execute('''INSERT INTO users (name, steamid32, time) VALUES (?, ?, 0)
-        ON CONFLICT (name) DO UPDATE SET steamid32=excluded.steamid32 WHERE name=excluded.name;''', (username, steamId))
+        conf.connection.getCursor().execute('INSERT INTO users (name, steamid32, time) VALUES (?, ?, 0) ON CONFLICT (name) DO UPDATE SET steamid32=excluded.steamid32 WHERE name=excluded.name;';, (username, steamId))
         await ctx.send(f'Successfully added {username} with SteamID32 {steamId}.')
 
     @commands.command(name='lastmatch', aliases=['lm'])
@@ -74,7 +73,7 @@ class Dota(commands.Cog):
         if not username:
             username = ctx.message.author.name
         try:
-            steamId = conf.connection.getCursor().execute('SELECT steamid32 FROM users WHERE name=?', (username)).fetchone()
+            steamId = conf.connection.getCursor().execute('SELECT steamid32 FROM users WHERE name=?;', (username)).fetchone()
         except:
             await ctx.send('You have to add a SteamID32 number first (use "?add SteamID32 [username]" comand).')
             return
