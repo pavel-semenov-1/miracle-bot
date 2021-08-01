@@ -13,7 +13,9 @@ class General(commands.Cog):
     async def list_command(self, ctx):
         embed = discord.Embed(title="List of top users")
         s = '\n'.join(conf.connection.getCursor().execute('SELECT name, steamid32, time FROM users ORDER BY time DESC LIMIT 10;'))
-        embed.add_field(name='', value=s)
+        if not(s):
+            s = "No user data available."
+        embed.add_field(name='Top-10', value=s)
         await ctx.send(embed=embed)
 
     @list_command.error
