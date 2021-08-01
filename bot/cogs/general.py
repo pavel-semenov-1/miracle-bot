@@ -16,7 +16,7 @@ class General(commands.Cog):
         s = ''
         for row in conf.connection.getCursor().execute('SELECT name, steamid32, time FROM users ORDER BY time DESC LIMIT 10;'):
             row = row[:-1] + (str(row[-1]),)
-            s += str(i) + ' '.join(row)
+            s += str(i) + '. ' + ' '.join(row)
             i += 1
         if not(s):
             s = "No user data available."
