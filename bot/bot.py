@@ -64,5 +64,5 @@ class MiracleBot(commands.Bot):
             await self.process_commands(msg)
 
     async def on_member_join(self, member):
-        role = discord.utils.get(member.guild.roles, name='👾DIVINE👾')
+        role = discord.utils.get(member.guild.roles, id=518413093764595723)
         await member.add_roles(role)
