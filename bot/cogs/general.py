@@ -12,7 +12,11 @@ class General(commands.Cog):
     @commands.command(name='list')
     async def list_command(self, ctx):
         embed = discord.Embed(title="List of top users")
-        s = '\n'.join(conf.connection.getCursor().execute('SELECT name, steamid32, time FROM users ORDER BY time DESC LIMIT 10;'))
+        i = 1
+        s = ''
+        for row in conf.connection.getCursor().execute('SELECT name, steamid32, time FROM users ORDER BY time DESC LIMIT 10;'):
+            s += str(i) + ' '.join(row)
+            i += 1
         if not(s):
             s = "No user data available."
         embed.add_field(name='Top-10', value=s)
