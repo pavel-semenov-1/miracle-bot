@@ -41,7 +41,11 @@ class MiracleBot(commands.Bot):
         print('Bot disconnected.')
 
     async def on_error(self, err, *args, **kwargs):
-        raise
+        with open('logs.txt', 'r') as file:
+            logs = file.read().split('\n')
+        with open('logs.txt', 'w') as file:
+            err_str = repr(err)
+            file.write('\n'.join(logs[100 - err_str.count('\n')]) + '\n' + err_str)
 
     async def on_command_error(self, ctx, exc):
         raise getattr(exc, 'original', exc)
