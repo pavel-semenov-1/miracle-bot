@@ -47,14 +47,6 @@ def get_user_name(query, ctx):
 class Dota(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
-        self.players = dict()
-        with open(os.path.join(conf.resource(''), 'players.txt'), 'r') as t:
-            for line in t.readlines():
-                try:
-                    username, steamid = line.split('~')
-                    self.players[username] = steamid[:-1]
-                except:
-                    continue
 
     @commands.command(name='match')
     async def match_command(self, ctx, match_id):
@@ -73,24 +65,20 @@ class Dota(commands.Cog):
     async def add_comand(self, ctx, steamId, *, username: t.Optional[str]):
         if not username:
             username = ctx.message.author.name
-        self.players[username] = steamId
-        s = ''
-        for user, id in self.players.items():
-            s += f'{user}~{id}\n'
-        with open(os.path.join(conf.resource(''), 'players.txt'), 'w') as t:
-            t.write(s)
+        conf.connection.getCursor().execute('INSERT INTO users (name, steamid32, time) VALUES (?, ?, 0) ON CONFLICT (name) DO UPDATE SET steamid32=excluded.steamid32 WHERE name=excluded.name;', (username, steamId))
+        conf.connection.getConnection().commit()
         await ctx.send(f'Successfully added {username} with SteamID32 {steamId}.')
 
     @commands.command(name='lastmatch', aliases=['lm'])
     async def last_match_command(self, ctx, *, username: t.Optional[str]):
+        if not username:
+            username = ctx.message.author.name
         try:
-            if username:
-                match = await get_stratz_player_last_match(self.players[get_user_name(username, ctx)])
-            else:
-                match = await get_stratz_player_last_match(self.players[ctx.message.author.name])
-        except KeyError:
+            steamId = conf.connection.getCursor().execute('SELECT steamid32 FROM users WHERE name=?;', (username)).fetchone()
+        except:
             await ctx.send('You have to add a SteamID32 number first (use "?add SteamID32 [username]" comand).')
             return
+        match = await get_stratz_player_last_match(steamId)
         async with ctx.typing():
             img = await dotaimage.create_match_result_image(await get_stratz_match(match['id']))
         file = discord.File(img, 'match.png')
