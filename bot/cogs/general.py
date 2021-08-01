@@ -12,7 +12,7 @@ class General(commands.Cog):
     @commands.command(name='list')
     async def list_command(self, ctx):
         embed = discord.Embed(title="List of top users")
-        s = '\n'.join(conf.connection.getCursor().execute('SELCT name, steamid32, time FROM users ORDER BY time DESC LIMIT 10;'))
+        s = '\n'.join(conf.connection.getCursor().execute('SELECT name, steamid32, time FROM users ORDER BY time DESC LIMIT 10;'))
         embed.add_field(name='', value=s)
         await ctx.send(embed=embed)
 
