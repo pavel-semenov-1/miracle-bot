@@ -63,7 +63,6 @@ class MiracleBot(commands.Bot):
         if not msg.author.bot:
             await self.process_commands(msg)
 
-    @self.event
     async def on_member_join(member):
         role = discord.utils.get(member.server.roles, id='👾DIVINE👾')
         await self.add_roles(member, role)
