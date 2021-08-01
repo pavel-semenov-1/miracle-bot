@@ -16,7 +16,7 @@ class General(commands.Cog):
         embed.add_field(name='', value=s)
         await ctx.send(embed=embed)
 
-    @match_command.error
+    @list_command.error
     async def list_command_error(self, ctx, exc):
         pass
 
