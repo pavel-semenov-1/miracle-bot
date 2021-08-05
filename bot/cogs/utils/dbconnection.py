@@ -2,6 +2,7 @@ import sqlite3
 
 class Connection:
     def __init__(self, bot):
+        print("Connecting to the database `miracle-bot.db`...")
         self.connection = sqlite3.connect('miracle-bot.db')
         self.cursor = self.connection.cursor()
 
@@ -12,8 +13,11 @@ class Connection:
         # populate tables with data
         for guild in bot.guilds:
             self.cursor.execute('INSERT INTO guilds VALUES (?, ?, NULL, NULL, NULL)', (guild.id, guild.name))
+            for member in guild.members:
+                self.cursor.execute('INSERT INTO members (guild_id, name, steamid32, time) VALUES (?, ?, NULL, 0)', (guild.id, member.name))
 
         self.connection.commit()
+        print("Successfully connected to the database")
 
     def getConnection(self):
         return self.connection
