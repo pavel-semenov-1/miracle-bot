@@ -4,7 +4,7 @@ import datetime as dt
 import aiohttp
 import os
 import bot.conf as conf
-from bot.ext import tasks
+from discord.ext import tasks
 
 class General(commands.Cog):
     def __init__(self, bot):
