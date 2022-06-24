@@ -25,7 +25,7 @@ class Cache:
 		self.cache_dir = conf.resource("cache/")
 		self.index_file = self.cache_dir + "cache_index.json"
 		self.cache = {}
-		self.lock = asyncio.Lock(loop=self.loop)
+		self.lock = asyncio.Lock()
 		if os.path.isfile(self.index_file):
 			self.cache = read_json(self.index_file)
 		for key in default_cache:
