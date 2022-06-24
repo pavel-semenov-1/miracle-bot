@@ -2,6 +2,7 @@ from pathlib import Path
 
 import discord
 from discord.ext import commands
+import bot.conf as conf
 
 class MiracleBot(commands.Bot):
     def __init__(self):
@@ -21,11 +22,8 @@ class MiracleBot(commands.Bot):
     def run(self):
         self.setup()
 
-        with open('data/token.0', 'r', encoding='utf-8') as f:
-            TOKEN = f.read()
-
         print('Running bot...')
-        super().run(TOKEN, reconnect=True)
+        super().run(conf.TOKEN, reconnect=True)
 
     async def shutdown(self):
         print('Closing connection to Discord...')
