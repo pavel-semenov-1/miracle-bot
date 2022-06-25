@@ -16,7 +16,7 @@ class Server(commands.Cog):
         app.router.add_get('/', handler)
         runner = web.AppRunner(app)
         await runner.setup()
-        self.site = web.TCPSite(runner, 'localhost', 80)
+        self.site = web.TCPSite(runner, 'localhost', 5000)
         await self.bot.wait_until_ready()
         await self.site.start()
 
