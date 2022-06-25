@@ -2,6 +2,7 @@ from aiohttp import web
 import asyncio
 import discord 
 from discord.ext import commands
+import os
         
 class Server(commands.Cog):
 
@@ -16,7 +17,7 @@ class Server(commands.Cog):
         app.router.add_get('/', handler)
         runner = web.AppRunner(app)
         await runner.setup()
-        self.site = web.TCPSite(runner, 'localhost', 5000)
+        self.site = web.TCPSite(runner, 'localhost', os.environ.get("PORT"))
         await self.bot.wait_until_ready()
         await self.site.start()
 
