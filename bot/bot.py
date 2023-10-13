@@ -10,7 +10,6 @@ class MiracleBot(commands.Bot):
         self._cogs = [p.stem for p in Path('.').glob('./bot/cogs/*.py')]
         self.http_client = http_client
         self.db_connection = db_connection
-        print(self.db_connection)
         super().__init__(command_prefix=self.prefix, case_insensitive=True, intents=discord.Intents.all())
 
     async def setup_hook(self):
