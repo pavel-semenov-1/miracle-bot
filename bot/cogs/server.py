@@ -23,7 +23,7 @@ class Server(commands.Cog):
     def __unload(self):
         asyncio.ensure_future(self.site.stop())
 
-def setup(bot):
+async def setup(bot):
     server = Server(bot)
-    bot.add_cog(server)
-    bot.loop.create_task(server.webserver())
+    await bot.add_cog(server)
+    # TODO run webserver in separate loop

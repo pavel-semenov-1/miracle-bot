@@ -20,8 +20,7 @@ def read_json(filename):
 		return json.load(f, object_pairs_hook=OrderedDict)
 
 class Cache:
-	def __init__(self, loop):
-		self.loop = loop
+	def __init__(self):
 		self.cache_dir = conf.resource("cache/")
 		self.index_file = self.cache_dir + "cache_index.json"
 		self.cache = {}
@@ -71,7 +70,7 @@ class Cache:
 
 	#creates a new entry in the cache and returns the filename of the new entry
 	async def new(self, uri, extension=None):
-		with (await self.lock):
+		async with self.lock:
 			if uri in self.files:
 				return self.cache_dir + self.files[uri]
 			filename = f"{self.cache['count']:0>4}"
@@ -102,7 +101,7 @@ class Cache:
 
 
 	async def remove(self, uri):
-		with (await self.lock):
+		async with self.lock:
 			filename = self.cache_dir + self.files.pop(uri)
 			self.save_cache()
 			if os.path.isfile(filename):
@@ -117,16 +116,19 @@ def raise_error(url, code, errors):
 		raise HttpError(template, code)
 
 class HttpGetter:
-	def __init__(self):
-		self.loop = asyncio.get_event_loop()
-		self.session = aiohttp.ClientSession(loop=self.loop)
-		self.cache = Cache(self.loop)
+	async def __aenter__(self):
+		self.session = aiohttp.ClientSession()
+		self.cache = Cache()
+		return self
 
-	async def get(self, url, return_type="json", cache=False, errors={}):
+	async def __aexit__(self, exc_t, exc_v, exc_tb):
+		await self.session.close()
+
+	async def get(self, url, return_type="json", cache=False, headers={}, errors={}):
 		if cache and self.cache.get_filename(url):
 			return self.cache.get(url, return_type)
 
-		async with self.session.get(url, timeout=60) as r:
+		async with self.session.get(url, headers=headers, timeout=60) as r:
 			if r.status == 200:
 				if cache:
 					await self.cache.save(url, return_type, r)

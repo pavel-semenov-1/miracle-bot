@@ -5,25 +5,22 @@ from discord.ext import commands
 import bot.conf as conf
 
 class MiracleBot(commands.Bot):
-    def __init__(self):
+    def __init__(self, http_client, db_connection):
         self.prefix = '?'
         self._cogs = [p.stem for p in Path('.').glob('./bot/cogs/*.py')]
+        self.http_client = http_client
+        self.db_connection = db_connection
+        print(self.db_connection)
         super().__init__(command_prefix=self.prefix, case_insensitive=True, intents=discord.Intents.all())
 
-    def setup(self):
+    async def setup_hook(self):
         print('Runnig setup...')
 
         for cog in self._cogs:
-            self.load_extension(f'bot.cogs.{cog}')
+            await self.load_extension(f'bot.cogs.{cog}')
             print(f'Loaded `{cog}` cog.')
 
         print('Setup complete.')
-
-    def run(self):
-        self.setup()
-
-        print('Running bot...')
-        super().run(conf.TOKEN, reconnect=True)
 
     async def shutdown(self):
         print('Closing connection to Discord...')
