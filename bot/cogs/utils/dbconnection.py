@@ -1,11 +1,15 @@
 import sqlite3
 
 class Connection:
-    def __init__(self):
+    async def __aenter__(self):
         self.connection = sqlite3.connect('miracle-bot.db')
         self.cursor = self.connection.cursor()
-        self.cursor.execute('CREATE TABLE IF NOT EXISTS users (id serial primary key, name text NOT NULL UNIQUE, steamid32 varchar(9), time integer)')
+        self.cursor.execute('CREATE TABLE IF NOT EXISTS users (id integer primary key, steamid32 varchar(9))')
         self.connection.commit()
+        return self
+
+    async def __aexit__(self, exc_t, exc_v, exc_tb):
+        self.connection.close()
 
     def getConnection(self):
         return self.connection

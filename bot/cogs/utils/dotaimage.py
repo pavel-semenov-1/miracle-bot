@@ -15,8 +15,10 @@ class DotaImage:
         self.image_url = image_url
 
     def put_text(self, text, x, y, color=(255,255,255,255), font_family='Oswald', font_size=40, anchor='center'):
-        font=ImageFont.truetype(os.path.join(self.font_path, font_family+'-Regular.ttf'), font_size)
-        w, h = self.draw.textsize(text, font=font)
+        if any(map(lambda c: ord(c) > 10000, text)):
+            font_family = 'NotoSansJP'
+        font = ImageFont.truetype(os.path.join(self.font_path, font_family+'-Regular.ttf'), font_size)
+        (_, _, w, h) = self.draw.textbbox((0,0), text, font=font)
         if anchor == 'center':
             self.draw.text((x-w/2,y-h/2), text, fill=color, font=font)
         elif anchor == 'left':
@@ -110,7 +112,7 @@ async def create_match_result_image(data):
         nw = round(player['networth']/1000, 1)
         nw = f'{nw}k'
         if i == 1:
-            img.put_text(player['steamAccount']['name'][:18], x+155, y+70, color=(0, 255, 255, 255), font_size=50, anchor='left', font_family='Oswald')
+            img.put_text(player['steamAccount']['name'][:16], x+155, y+70, color=(0, 255, 255, 255), font_size=50, anchor='left', font_family='Oswald')
             img.put_text(kda, x+155+380, y+70, font_size=50, anchor='left')
             img.put_text(nw, x+155+380+215, y+70, font_size=50, anchor='left', color=(255, 220, 0, 255))
         else:

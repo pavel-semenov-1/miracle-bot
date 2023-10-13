@@ -14,7 +14,7 @@ class General(commands.Cog):
         embed = discord.Embed(title="List of top users")
         i = 1
         s = ''
-        for row in conf.connection.getCursor().execute('SELECT name, steamid32, time FROM users ORDER BY time DESC LIMIT 10;'):
+        for row in self.bot.db_connection.getCursor().execute('SELECT id, steamid32 FROM users ORDER BY id DESC LIMIT 10;'):
             row = row[:-1] + (str(row[-1]),)
             s += str(i) + '. ' + ' '.join(row)
             i += 1
@@ -25,7 +25,7 @@ class General(commands.Cog):
 
     @list_command.error
     async def list_command_error(self, ctx, exc):
-        pass
+        raise exc
 
-def setup(bot):
-    bot.add_cog(General(bot))
+async def setup(bot):
+    await bot.add_cog(General(bot))

@@ -11,17 +11,17 @@ import bot.cogs.utils.dotaimage as dotaimage
 class StratzMatchNotParsedError(commands.CommandError):
     pass
 
-async def get_stratz_match(match_id):
+async def get_stratz_match(bot, match_id):
     url = f"https://api.stratz.com/api/v1/match/{match_id}"
     try:
-        result = await conf.httpgetter.get(url, cache=True, errors={500: "Looks like something wrong with the STRATZ api", 204: "STRATZ hasn't recieved this match yet. Try again a bit later"})
+        result = await bot.http_client.get(url, cache=True, headers={"Authorization": f"Bearer {conf.STRATZ_TOKEN}"}, errors={500: "Looks like something wrong with the STRATZ api", 204: "STRATZ hasn't recieved this match yet. Try again a bit later"})
         return result
     except aiohttp.ClientConnectorError:
         raise StratzMatchNotParsedError()
 
-async def get_stratz_player_last_match(player_id):
+async def get_stratz_player_last_match(bot, player_id):
     url = f"https://api.stratz.com/api/v1/Player/{player_id}/matches"
-    result = await conf.httpgetter.get(url, cache=False, errors={500: "Looks like something wrong with the STRATZ api", 204: "STRATZ hasn't recieved this match yet. Try again a bit later"})
+    result = await bot.http_client.get(url, cache=False, headers={"Authorization": f"Bearer {conf.STRATZ_TOKEN}"}, errors={500: "Looks like something wrong with the STRATZ api", 204: "STRATZ hasn't recieved this match yet. Try again a bit later"})
     return result[0]
 
 def get_match_embed(data):
@@ -51,7 +51,7 @@ class Dota(commands.Cog):
     @commands.command(name='match')
     async def match_command(self, ctx, match_id):
         async with ctx.typing():
-            data = await get_stratz_match(match_id)
+            data = await get_stratz_match(self.bot, match_id)
         img = await dotaimage.create_match_result_image(data)
         file = discord.File(img, 'match.png')
         await ctx.send(file=file)
@@ -62,25 +62,26 @@ class Dota(commands.Cog):
             await ctx.send('Match is not yet parsed.')
 
     @commands.command(name="add")
-    async def add_comand(self, ctx, steamId, *, username: t.Optional[str]):
-        if not username:
-            username = ctx.message.author.name
-        conf.connection.getCursor().execute('INSERT INTO users (name, steamid32, time) VALUES (?, ?, 0) ON CONFLICT (name) DO UPDATE SET steamid32=excluded.steamid32 WHERE name=excluded.name;', (username, steamId))
-        conf.connection.getConnection().commit()
-        await ctx.send(f'Successfully added {username} with SteamID32 {steamId}.')
+    async def add_comand(self, ctx, steamId):
+        member_id = ctx.message.author.id
+        self.bot.db_connection.getCursor().execute('INSERT INTO users (id, steamid32) VALUES (?, ?) ON CONFLICT (id) DO UPDATE SET steamid32=excluded.steamid32 WHERE id=excluded.id;', (member_id, steamId))
+        self.bot.db_connection.getConnection().commit()
+        await ctx.send(f'Successfully associated {ctx.message.author.name} with SteamID32 {steamId}.')
 
     @commands.command(name='lastmatch', aliases=['lm'])
     async def last_match_command(self, ctx, *, username: t.Optional[str]):
-        if not username:
-            username = ctx.message.author.name
-        try:
-            steamId = conf.connection.getCursor().execute('SELECT steamid32 FROM users WHERE name=?;', (username)).fetchone()
-        except:
-            await ctx.send('You have to add a SteamID32 number first (use "?add SteamID32 [username]" comand).')
-            return
-        match = await get_stratz_player_last_match(steamId)
+        # TODO allow querying other users' matches
+        # if not username:
+        #    username = ctx.message.author.name
+        member_id = ctx.message.author.id
+        #try:
+        steamId = self.bot.db_connection.getCursor().execute('SELECT steamid32 FROM users WHERE id=?;', (member_id,)).fetchone()
+        #except:
+        #    await ctx.send('You have to add a SteamID32 number first (use "?add SteamID32 [username]" comand).')
+        #    return
+        match = await get_stratz_player_last_match(self.bot, steamId[0])
         async with ctx.typing():
-            img = await dotaimage.create_match_result_image(await get_stratz_match(match['id']))
+            img = await dotaimage.create_match_result_image(await get_stratz_match(self.bot, match['id']))
         file = discord.File(img, 'match.png')
         await ctx.send(file=file)
 
@@ -88,7 +89,9 @@ class Dota(commands.Cog):
     async def last_match_command_error(self, ctx, exc):
         if isinstance(exc, KeyError):
             await ctx.send('You have to add a SteamID32 number first (use "?add SteamID32 [username]" comand).')
+        else:
+            raise exc
 
 
-def setup(bot):
-    bot.add_cog(Dota(bot))
+async def setup(bot):
+    await bot.add_cog(Dota(bot))
